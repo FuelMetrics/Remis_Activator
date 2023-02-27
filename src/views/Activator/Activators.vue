@@ -1,0 +1,153 @@
+<template>
+    <div>
+        <CRow>
+            <CCol :md="12">
+                <CCard class="mb-4">
+                    <CCardBody>
+                        <CTable align="middle" class="mb-0 border" hover responsive>
+                            <CTableHead color="light">
+                                <CTableRow>
+                                    <CTableHeaderCell class="text-center">
+                                        <CIcon name="cil-people" />
+                                    </CTableHeaderCell>
+                                    <CTableHeaderCell>Name</CTableHeaderCell>
+                                    <CTableHeaderCell class="text-center">Country</CTableHeaderCell>
+                                    <CTableHeaderCell>Email</CTableHeaderCell>
+                                    <CTableHeaderCell>Phone Number</CTableHeaderCell>
+                                    <CTableHeaderCell>Activations</CTableHeaderCell>
+                                    <!-- <CTableHeaderCell class="text-center">Payment Method</CTableHeaderCell> -->
+                                    <!-- <CTableHeaderCell>Activity</CTableHeaderCell> -->
+                                </CTableRow>
+                            </CTableHead>
+                            <CTableBody v-if="activators.length > 0">
+                                <CTableRow v-for="item in activators" :key="item.name">
+                                    <CTableDataCell class="text-center">
+                                        <CAvatar v-if="item.avatar.src !== null" size="md" :src="item.avatar.src"
+                                            :status="item.avatar.status" />
+                                        <CIcon v-else name="cil-user" :status="item.avatar.status" />
+                                    </CTableDataCell>
+                                    <CTableDataCell>
+                                        <div>{{ item.name }}</div>
+                                        <!-- <div class="small text-medium-emphasis">
+                                                                                <span>{{ item.new ? 'New' : 'Recurring' }}</span> |
+                                                                                {{ item.registered }}
+                                                                            </div> -->
+                                    </CTableDataCell>
+                                    <CTableDataCell class="text-center">
+                                        <CIcon size="xl" :name="item.country.flag" :title="item.country.name" />
+                                    </CTableDataCell>
+                                    <CTableDataCell class="text-left">
+                                        <span>{{ item.email }}</span>
+                                    </CTableDataCell>
+                                    <CTableDataCell class="text-left">
+                                        <span>{{ item.phoneNo }}</span>
+                                    </CTableDataCell>
+                                    <CTableDataCell class="text-left">
+                                        <span><small class="text-medium-emphasis">Today:</small> {{ item.today }} |
+                                            <small class="text-medium-emphasis">Total:</small> {{ item.total }}
+                                        </span>
+                                    </CTableDataCell>
+                                    <!-- <CTableDataCell>
+                                                                            <div class="clearfix">
+                                                                                <div class="float-start">
+                                                                                    <strong>{{ item.usage.value }}%</strong>
+                                                                                </div>
+                                                                                <div class="float-end">
+                                                                                    <small class="text-medium-emphasis">
+                                                                                        {{ item.usage.period }}
+                                                                                    </small>
+                                                                                </div>
+                                                                            </div>
+                                                                            <CProgress thin :color="item.usage.color" :value="item.usage.value" />
+                                                                        </CTableDataCell>
+                                                                        <CTableDataCell class="text-center">
+                                                                            <CIcon size="xl" :name="item.payment.icon" />
+                                                                        </CTableDataCell> -->
+                                    <!-- <CTableDataCell>
+                                            <div class="small text-medium-emphasis">Last login</div>
+                                            <strong>{{ item.activity }}</strong>
+                                        </CTableDataCell> -->
+                                </CTableRow>
+                                <CTableRow> </CTableRow>
+                            </CTableBody>
+                        </CTable>
+                    </CCardBody>
+                </CCard>
+            </CCol>
+        </CRow>
+    </div>
+</template>
+
+<script>
+import config from '@/config'
+import { mapGetters } from "vuex";
+import avatar1 from '@/assets/images/avatar.png'
+
+export default {
+    name: 'Activators',
+    title: 'Activators',
+    components: {
+
+    },
+    data() {
+        return {
+            activators: [],
+            //     {
+            //         avatar: { src: avatar1, status: 'success' },
+            //         name: 'Gabriel Ojomu',
+            //         new: true,
+            //         registered: 'Jan 1, 2021',
+            //         email: 'gabriel@email.com',
+            //         phoneNo: '08099009988',
+            //         country: { name: 'NGA', flag: 'cif-ng' },
+            //         payment: { name: 'Mastercard', icon: 'cib-cc-mastercard' },
+            //         activity: '10 sec ago',
+            //     },
+            //     {
+            //         avatar: { src: null, status: 'success' },
+            //         name: 'Tomiwa Oluwawibe',
+            //         new: true,
+            //         registered: 'Jan 1, 2023',
+            //         email: 'tomiwa@email.com',
+            //         phoneNo: '08099009999',
+            //         country: { name: 'NGA', flag: 'cif-ng' },
+            //         payment: { name: 'Visa', icon: 'cib-cc-visacard' },
+            //         activity: '10 sec ago',
+            //     }
+            // ]
+        }
+    },
+    computed: {
+        ...mapGetters({
+            authConfig: "getAuthConfig",
+        }),
+    },
+    mounted() {
+        console.log('Mounted')
+        this.getActivators();
+    },
+    methods: {
+        getActivators() {
+            this.axios.get(`${config.apiBaseUrl}/Activator/MyActivators`, this.authConfig)
+                .then(res => {
+                    this.activators = []
+
+                    res.data.data.forEach(a => {
+                        this.activators.push({
+                            name: a.name,
+                            email: a.email,
+                            phoneNo: a.phone,
+                            today: a.todayActivations,
+                            total: a.totalActivations,
+                            country: { name: 'NGA', flag: 'cif-ng' },
+                            avatar: { src: a.avatarUrl !== null && a.avatarUrl.length > 0 ? a.avatarUrl : avatar1, status: 'success' }
+                        })
+                    });
+
+                })
+                .catch(() => {
+                })
+        }
+    }
+}
+</script>

@@ -1,7 +1,8 @@
 import { h, resolveComponent } from 'vue'
-import { createRouter, createWebHashHistory } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 
 import DefaultLayout from '@/layouts/DefaultLayout'
+const _userDetails = JSON.parse(localStorage.getItem("userDetails"));
 
 const routes = [
   {
@@ -16,14 +17,54 @@ const routes = [
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
-        component: () =>
-          import(/* webpackChunkName: "dashboard" */ '@/views/Dashboard.vue'),
+        component: () => {
+          return import('@/views/Dashboard.vue')
+          // let userDetails = _userDetails === null || _userDetails === undefined
+          //   ? JSON.parse(localStorage.getItem("userDetails"))
+          //   : _userDetails;
+          // if (userDetails.currentProfile === "ActivatorSupervisor") {
+          //   return import('@/views/Dashboard.vue');
+          // } else {
+          //   return import('@/views/ActivatorDashboard.vue');
+          // }
+        },
+        meta: {
+          authorize: true,
+          authRoles: ["Activator", "ActivatorSupervisor"],
+        },
       },
       {
-        path: '/theme',
-        name: 'Theme',
-        redirect: '/theme/typography',
+        path: '/Activators',
+        name: 'Activators',
+        component: () => import('@/views/Activator/Activators.vue'),
+        meta: {
+          authorize: true,
+          authRoles: ["ActivatorSupervisor"],
+        },
       },
+      {
+        path: '/Customers',
+        name: 'Customers',
+        component: () => {
+          let userDetails = _userDetails === null || _userDetails === undefined
+            ? JSON.parse(localStorage.getItem("userDetails"))
+            : _userDetails;
+          if (userDetails.currentProfile === "ActivatorSupervisor") {
+            return import('@/views/Customers/List.vue');
+          } else {
+            return import('@/views/Customers/MyList.vue');
+          }
+        },
+        meta: {
+          authorize: true,
+          authRoles: ["Activator", "ActivatorSupervisor"],
+        },
+      },
+      // {
+      //   path: '/theme',
+      //   name: 'Theme',
+      //   redirect: '/theme/typography',
+      // },
       {
         path: '/theme/colors',
         name: 'Colors',
@@ -261,6 +302,11 @@ const routes = [
       },
     ],
   },
+  // {
+  //   path: "*",
+  //   name: "NotFound",
+  //   component: () => import("../views/pages/Page404"),
+  // },
   {
     path: '/pages',
     redirect: '/pages/404',
@@ -293,15 +339,135 @@ const routes = [
       },
     ],
   },
+  {
+    path: '/Account',
+    name: 'Account',
+    redirect: '/pages/404',
+    meta: {
+      guest: true,
+    },
+    component: {
+      render() {
+        return h(resolveComponent('router-view'))
+      },
+    },
+    children: [
+      {
+        path: 'Login',
+        name: 'Login',
+        component: () => import('@/views/pages/Login'),
+        meta: {
+          guest: true,
+          blockWhenLogin: true
+        },
+      },
+      {
+        path: 'Register',
+        name: 'Register',
+        component: () => import('@/views/pages/Register'),
+        meta: {
+          guest: true,
+          blockWhenLogin: true
+        },
+      },
+      {
+        path: 'ForgotPassword',
+        name: 'ForgotPassword',
+        component: () => import('@/views/pages/ForgotPassword'),
+        meta: {
+          guest: true,
+          blockWhenLogin: true
+        },
+      },
+    ]
+  }
 ]
 
 const router = createRouter({
-  history: createWebHashHistory(process.env.BASE_URL),
+  history: createWebHistory(), //process.env.BASE_URL),
   routes,
   scrollBehavior() {
     // always scroll to top
     return { top: 0 }
   },
+})
+
+router.beforeEach((to, from, next) => {
+  if (to.matched.some((rec) => rec.meta.authorize)) {
+    console.log('Authorized pages')
+    if (!localStorage.getItem('userDetails') || localStorage.getItem('userDetails') == null || localStorage.getItem('userDetails' == 'null')) {
+      console.log('No login user, Goto Login')
+      next({ name: 'Login', params: { nextUrl: to.fullPath } })
+    } else {
+      console.log('a user is logged in >> ', to.name)
+      let user = JSON.parse(localStorage.getItem('userDetails'))
+      console.log('x1')
+      if (to.meta.authRoles.includes('ActivatorSupervisor')
+        && user.roles.includes('ActivatorSupervisor')) {
+        console.log('x2')
+        next()
+      }
+      else if (to.name !== 'ChangePassword' && user.forcePasswordChange) {
+        console.log('ChangePassword >>> ')
+        next({ name: 'ChangePassword' })
+      }
+      else {
+        console.log('x3')
+        if (to.meta.authRoles.length === 0) {
+          console.log('x4')
+          //.includes('Supervisor')) && user.roles.includes('Supervisor'))
+          next()
+        } //if (to.matched.some((rec) => rec.meta.authRoles.includes('Company')) &&  user.roles.includes('Company'))
+        else {
+          console.log('x5')
+          let allow = false
+          to.meta.authRoles.forEach((e) => {
+            if (user.roles.includes(e)) {
+              allow = true
+            }
+          })
+          if (allow) {
+            next()
+          } else {
+            console.log('No match for me')
+            next({ name: 'NotAllowed' })
+          }
+        }
+        // else {
+        //     console.log('No match for me')
+        //     next({ name: 'NotAllowed' })
+        // }
+      }
+    }
+  }
+  else if (to.matched.some((rec) => rec.meta.guest)) {
+    console.log(JSON.parse(localStorage.getItem('userDetails')))
+    if (to.matched.some((rec) => rec.meta.blockWhenLogin)) {
+      console.log('goto auth page');
+      if (localStorage.getItem('userDetails') !== null && JSON.parse(localStorage.getItem('userDetails') !== null)) {
+        next({ name: 'Dashboard' })
+      }
+      else //if (
+      //   localStorage.getItem('userDetails') ||
+      //   localStorage.getItem('userDetails') !== null ||
+      //   localStorage.getItem('userDetails') !== 'null'
+      // )
+      {
+        next()
+      }
+    }
+    next()
+  }
+  else {
+    // Open pages
+    next()
+    // let user = JSON.parse(localStorage.getItem('userDetails'))
+    // if (user.roles.includes('Company') && !user.isActive) {
+    //   next({ name: 'Onboard' })
+    // } else {
+    //   next()
+    // }
+  }
 })
 
 export default router

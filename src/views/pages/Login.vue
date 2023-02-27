@@ -13,29 +13,36 @@
                     <CInputGroupText>
                       <CIcon icon="cil-user" />
                     </CInputGroupText>
-                    <CFormInput
-                      placeholder="Username"
-                      autocomplete="username"
-                    />
+                    <CFormInput placeholder="Username" v-model="email" />
                   </CInputGroup>
                   <CInputGroup class="mb-4">
                     <CInputGroupText>
                       <CIcon icon="cil-lock-locked" />
                     </CInputGroupText>
-                    <CFormInput
-                      type="password"
-                      placeholder="Password"
-                      autocomplete="current-password"
-                    />
+                    <CFormInput type="password" autocomplete="off" placeholder="Password" v-model="password" />
                   </CInputGroup>
                   <CRow>
                     <CCol :xs="6">
-                      <CButton color="primary" class="px-4"> Login </CButton>
+                      <CButton color="primary" class="px-4" @click="login()" type="button" :disabled="disableButton"
+                        :class="disableButton || sending ? 'disabled' : ''">
+                        <span class="mb-0" v-if="!sending">Login
+                          <!-- <CIcon size="sm" :name="'cilPlus'" /> -->
+                        </span>
+                        <span v-else-if="sending" :class="sending ? 'wait' : ''">
+                          Please wait
+                          <spinner />
+                        </span>
+                      </CButton>
                     </CCol>
                     <CCol :xs="6" class="text-right">
-                      <CButton color="link" class="px-0">
+                      <CButton color="link" class="px-0" @click="gotoForgotPassword()">
                         Forgot password?
                       </CButton>
+                    </CCol>
+                    <CCol :xs="12" class="text-center mt-5 text-danger">
+                      <p>
+                        {{ errMsg }}
+                      </p>
                     </CCol>
                   </CRow>
                 </CForm>
@@ -46,11 +53,9 @@
                 <div>
                   <h2>Sign up</h2>
                   <p>
-                    Lorem ipsum dolor sit amet, consectetur adipisicing elit,
-                    sed do eiusmod tempor incididunt ut labore et dolore magna
-                    aliqua.
+
                   </p>
-                  <CButton color="light" variant="outline" class="mt-3">
+                  <CButton color="light" variant="outline" class="mt-3" @click="gotoRegister()">
                     Register Now!
                   </CButton>
                 </div>
@@ -60,11 +65,82 @@
         </CCol>
       </CRow>
     </CContainer>
+    <!-- <CAlert color="warning" dismissible @close="alert">
+                                          <strong>Go right ahead</strong> and click that dimiss over there on the right.
+                                        </CAlert> -->
   </div>
 </template>
 
 <script>
+import config from "@/config";
+import router from "@/router";
+import spinner from '@/components/widgets/spinner.vue'
 export default {
   name: 'Login',
+  title: 'Login',
+  components: {
+    spinner
+  },
+  data() {
+    return {
+      alertMsg: '',
+      email: '',
+      password: '',
+      disableButton: false,
+      sending: false,
+      errMsg: ''
+    }
+  },
+  mounted() {
+
+  },
+  methods: {
+
+    login() {
+      if (!this.email || this.email.length <= 0 || !this.password || this.password.length <= 0) {
+        this.alertMsg = 'Please complete all fields'
+      }
+      else {
+        this.disableButton = true;
+        this.sending = true;
+        this.errMsg = ''
+        let data = {
+          email: this.email,
+          password: this.password,
+        };
+        this.axios
+          .post(`${config.apiBaseUrl}/Login`, data)
+          .then(async (response) => {
+            // sessionStorage.setItem('userEmail', this.email);
+            this.disableButton = false;
+            this.sending = false;
+            this.$store.commit("setUserDetails", response.data);
+            router.push({ name: "Dashboard" });
+          })
+          .catch(() => {
+            this.disableButton = false;
+            this.sending = false;
+            this.errMsg = 'Invalid login attempt!'
+
+            //', {
+            //   title: `Login`,
+            //   variant: "danger",
+            //   solid: true,
+            //   autoHideDelay: 4000,
+            // });
+          });
+      }
+    },
+    login1() {
+      this.disableButton = true;
+      this.sending = true;
+    },
+    gotoRegister() {
+      router.push({ name: 'Register' })
+    },
+    gotoForgotPassword() {
+      router.push({ name: 'ForgotPassword' })
+    },
+  }
 }
 </script>

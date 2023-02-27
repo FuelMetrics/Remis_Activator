@@ -21,18 +21,7 @@
           </div> &nbsp;
         </div>
       </div>
-      <div class="col-md-3 col-sm-6 col-12">
-        <div class="card bg-info text-high-emphasis-inverse mb-4">
-          <div class="card-body pb-0 d-flex justify-content-between align-items-start">
-            <div>
-              <div class="fs-5 fw-semibold ">{{ 'Agbeloba Station' }}</div>
-              <div style="font-size: small;">1/3 Vincent Street, Abeokuta</div>
-            </div>
-          </div> &nbsp;
-        </div>
-      </div>
-      <!-- <div class="col-md-3 offset-md-3 col-sm-6 col-12"> -->
-      <div class="col-md-3 col-sm-6 col-12">
+      <div class="col-md-3 offset-md-3 col-sm-6 col-12">
         <div class="card bg-transparent text-high-emphasis-inverse mb-4" style="border-color: transparent;">
           <div class="card-body pb-0 d-flex justify-content-end align-items-start">
             <div>
@@ -62,7 +51,7 @@
                     <!-- <CTableHeaderCell class="text-center">Country</CTableHeaderCell> -->
                     <CTableHeaderCell>Email | Phone</CTableHeaderCell>
                     <CTableHeaderCell>Card Number</CTableHeaderCell>
-                    <!-- <CTableHeaderCell>Balance</CTableHeaderCell> -->
+                    <CTableHeaderCell>Balance</CTableHeaderCell>
                     <CTableHeaderCell class="text-center">Date Activated</CTableHeaderCell>
                     <CTableHeaderCell class="text-right">Activity</CTableHeaderCell>
                   </CTableRow>
@@ -85,10 +74,10 @@
                       <span>{{ item.cardNumber }}</span>
                     </CTableDataCell>
 
-                    <!-- <CTableDataCell>
-                                    <span class="small text-medium-emphasis">NGN</span>
-                                    &nbsp; <strong>0.00</strong>
-                                  </CTableDataCell> -->
+                    <CTableDataCell>
+                      <span class="small text-medium-emphasis">NGN</span>
+                      &nbsp; <strong>0.00</strong>
+                    </CTableDataCell>
                     <CTableDataCell class="text-center">
                       <span>{{ item.dateActivatedStr }}</span>
                       <!-- <CIcon size="xl" :name="item.payment.icon" /> -->
@@ -97,9 +86,6 @@
                       <CButton size="sm" v-if="item.cardActivated === false" color="primary"
                         @click="toggleActivateCard(item.id)">
                         Activate Card
-                      </CButton>
-                      <CButton size="sm" v-else color="info" @click="toggleTransactions(item.id)">
-                        Transactions
                       </CButton>
                     </CTableDataCell>
                   </CTableRow>
@@ -110,35 +96,6 @@
           </CCard>
         </CCol>
       </CRow>
-
-
-      <CModal backdrop="static" :visible="openMapCardUserModal" @close="() => { openMapCardUserModal = false }">
-        <CModalHeader>
-          <CModalTitle>Map Existing User to Card</CModalTitle>
-        </CModalHeader>
-        <CModalBody>
-          <p>
-            User with the provided email/phone "<strong>{{ email }}/{{ phone }}</strong>" is already existing. Do you want
-            to proceed to linking the card <string>{{ cardNumber }}</string> to this user?
-          </p>
-        </CModalBody>
-        <CModalFooter>
-          <CButton color="secondary" @click="() => { openMapCardUserModal = false }" :disabled="disableButton"
-            :class="disableButton || sending ? 'disabled' : ''">
-            NO! Cancel
-          </CButton>
-          <CButton color="primary" @click="mapCardToExistingUser()" :disabled="disableButton"
-            :class="disableButton || sending ? 'disabled' : ''" type="submit">
-            <span class="mb-0" v-if="!sending">YES! Link Card</span>
-            <span v-else-if="sending" :class="sending ? 'wait' : ''">
-              Please wait
-              <spinner />
-            </span>
-          </CButton>
-        </CModalFooter>
-      </CModal>
-
-
       <CModal backdrop="static" :visible="openActivateCardModal" @close="() => { openActivateCardModal = false }">
         <CModalHeader>
           <CModalTitle>Activate User Card</CModalTitle>
@@ -229,73 +186,15 @@
           <CButton color="danger" @click="() => { openAlertModal = false }">Ok</CButton>
         </CModalFooter>
       </CModal>
-
-      <CModal backdrop="static" size="lg" :visible="openTransactionModal" @close="() => { openTransactionModal = false }">
-        <CModalHeader>
-          <CModalTitle>Transactions</CModalTitle>
-        </CModalHeader>
-        <CModalBody>
-          <CTable align="middle" class="mb-0 border" hover responsive>
-            <CTableHead color="light">
-              <CTableRow>
-                <CTableHeaderCell>#</CTableHeaderCell>
-                <CTableHeaderCell>Date</CTableHeaderCell>
-                <CTableHeaderCell class="text-right">Credit</CTableHeaderCell>
-                <CTableHeaderCell class="text-right">Debit</CTableHeaderCell>
-                <CTableHeaderCell class="text-right">Balance</CTableHeaderCell>
-                <CTableHeaderCell class="text-left">Description</CTableHeaderCell>
-              </CTableRow>
-            </CTableHead>
-            <CTableBody v-if="selectionTransactions.length > 0">
-              <CTableRow v-for="item in selectionTransactions" :key="item.id">
-                <CTableDataCell class="text-center">
-                  {{ selectionTransactions.indexOf(item) + 1 }}
-                </CTableDataCell>
-                <CTableDataCell>
-                  <div>{{ item.dateStr }}</div>
-                </CTableDataCell>
-                <CTableDataCell class="text-right">
-                  <div>{{ (item.type === 'Credit' ? item.amount : 0).toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  }) }}</div>
-                </CTableDataCell>
-                <CTableDataCell class="text-right">
-                  <div>{{ (item.type === 'Debit' ? item.amount : 0).toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  }) }}</div>
-                </CTableDataCell>
-                <CTableDataCell class="text-right">
-                  <span>{{ item.newBalance.toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  }) }}</span>
-                </CTableDataCell>
-                <CTableDataCell class="text-left">
-                  <span>{{ item.description }}</span>
-                </CTableDataCell>
-
-              </CTableRow>
-              <CTableRow> </CTableRow>
-            </CTableBody>
-          </CTable>
-        </CModalBody>
-        <CModalFooter>
-          <CButton color="secondary" @click="() => { openTransactionModal = false }">
-            Close
-          </CButton>
-        </CModalFooter>
-      </CModal>
     </div>
 
   </div>
 </template>
 
 <script>
-
-import config from '@/config'
+// import WidgetsStatsA from './widgets/WidgetsStatsTypeA.vue'
 import spinner from '@/components/widgets/spinner.vue'
+import config from '@/config'
 import moment from 'moment'
 import { mapGetters } from "vuex";
 import { CButton } from '@coreui/vue';
@@ -305,6 +204,9 @@ export default {
   name: 'Dashboard',
   title: 'Dashboard',
   components: {
+    // MainChartExample,
+    // WidgetsStatsA,
+    // WidgetsStatsD,
     CButton,
     spinner
   },
@@ -312,14 +214,11 @@ export default {
     return {
       disableButton: false,
       sending: false,
-      loadingTransactions: false,
       alertMsg: '',
       alertType: '',
       openAddNewModal: false,
       openActivateCardModal: false,
       openAlertModal: false,
-      openMapCardUserModal: false,
-      openTransactionModal: false,
       firstName: '',
       lastName: '',
       email: '',
@@ -334,10 +233,8 @@ export default {
       newPin: '',
       selectedCardNo: '',
       selectedCardOwner: '',
-      tileTotal: 0,
       tileToday: 0,
-      selectedActivation: {},
-      selectionTransactions: []
+      tileTotal: 0,
     }
   },
   computed: {
@@ -353,7 +250,7 @@ export default {
   watch: {
     openAddNewModal() {
       if (this.openAddNewModal === false) {
-        // this.clearFields()
+        this.clearFields()
       }
     },
     openAlertModal() {
@@ -366,6 +263,7 @@ export default {
   methods: {
     activateNew() {
       if (!this.validateEntry()) {
+        // alert('Please complete all required fields before proceeding');
         this.alertMsg = 'Please complete all required fields before proceeding'
         this.alertType = 'warn'
         this.openAlertModal = true;
@@ -395,44 +293,14 @@ export default {
             this.clearFields();
           })
           .catch(err => {
+            console.log('Unable create new activation >> ', err.response);
             this.disableButton = false;
             this.sending = false
-            if (err.response.data.message === 'Duplicate') {
-              this.openAddNewModal = false
-              this.openMapCardUserModal = true
-            }
-            else {
-              console.log('Unable create new activation >> ', err.response);
-              this.alertMsg = `${err.response.data.message}`
-              this.alertType = ''
-              this.openAlertModal = true;
-            }
+            this.alertMsg = `${err.response.data.message}`
+            this.alertType = ''
+            this.openAlertModal = true;
           })
       }
-    },
-    mapCardToExistingUser() {
-      this.disableButton = true;
-      this.sending = true
-      this.axios.post(`${config.apiBaseUrl}/Activator/Map/${this.cardNumber}?username=${this.email}`, {}, this.authConfig)
-        .then(() => {
-          this.disableButton = false;
-          this.sending = false
-          // console.log('Activation response: ', res.data)
-          this.getActivations();
-          this.alertMsg = `New Remis card Mapped to user "${this.firstName} ${this.lastName}" successfully`
-          this.alertType = 'ok'
-          this.openMapCardUserModal = false;
-          this.openAlertModal = true;
-          this.clearFields();
-        })
-        .catch(err => {
-          this.disableButton = false;
-          this.sending = false
-          console.log('Unable to Map card to User >> ', err.response);
-          this.alertMsg = `${err.response.data.message}`
-          this.alertType = ''
-          this.openMapCardUserModal = true;
-        })
     },
     clearFields() {
       this.firstName = ''
@@ -445,13 +313,6 @@ export default {
     toggleActivateCard(id) {
       this.selectedUser = this.activations.filter(a => a.id === id)[0]
       this.openActivateCardModal = true;
-    },
-    toggleTransactions(id) {
-      this.selectedUser = this.activations.filter(a => a.id === id)[0]
-      console.log('Selection:: ', this.selectedUser.cardNumber)
-      this.loadingTransactions = true;
-      this.openTransactionModal = true;
-      this.getCardTransaction();
     },
     activateCard() {
       this.disableButton = true;
@@ -490,8 +351,8 @@ export default {
             e.dateActivatedStr = moment(e.dateActivated).format('MMM DD, YYYY - h:m:a')
           });
           this.activations = res.data.myActivations;
-          this.tileTotal = res.data.total;
           this.tileToday = res.data.today;
+          this.tileTotal = res.data.total;
         })
         .catch(() => {
           console.log('Unable to get My Activations');
@@ -517,19 +378,6 @@ export default {
       this.axios.get(`${config.apiBaseUrl}/Activator/Branches`, this.authConfig)
         .then(res => {
           this.branches = res.data.data;
-        })
-        .catch(() => {
-          console.log('Unable to get branches list');
-        })
-    },
-    getCardTransaction() {
-      this.axios.get(`${config.apiBaseUrl}/Card/Details/${this.selectedUser.cardNumber}`, this.authConfig)
-        .then(res => {
-          this.selectionTransactions = res.data.data.transactions.data;
-          console.log('This iss good :: ', this.selectionTransactions)
-          this.selectionTransactions.forEach(e => {
-            e.dateStr = moment(e.date).format('MMM DD, YYYY - h:m:a')
-          });
         })
         .catch(() => {
           console.log('Unable to get branches list');

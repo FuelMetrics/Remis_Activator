@@ -24,11 +24,13 @@ import {
   cibCcApplePay,
   cibCcAmex,
 } from '@coreui/icons'
-import { cifUs, cifBr, cifIn, cifFr, cifEs, cifPl } from '@coreui/icons'
+import { cifUs, cifBr, cifIn, cifFr, cifEs, cifPl, cifNg } from '@coreui/icons'
 import {
   cilArrowBottom,
   cilArrowRight,
   cilArrowTop,
+  cilBraille,
+  cilMoodVeryGood,
   cilBan,
   cilBasket,
   cilBell,
@@ -66,6 +68,7 @@ import {
   cilOptions,
   cilPencil,
   cilPeople,
+  cilPlus,
   cilPuzzle,
   cilSettings,
   cilShieldAlt,
@@ -76,6 +79,7 @@ import {
   cilUser,
   cilUserFemale,
   cilUserFollow,
+  cilWarning,
   cilXCircle,
 } from '@coreui/icons'
 
@@ -87,6 +91,8 @@ export const iconsSet = Object.assign(
     cilArrowTop,
     cilBan,
     cilBasket,
+    cilBraille,
+    cilMoodVeryGood,
     cilBell,
     cilCalculator,
     cilCalendar,
@@ -122,6 +128,7 @@ export const iconsSet = Object.assign(
     cilOptions,
     cilPencil,
     cilPeople,
+    cilPlus,
     cilPuzzle,
     cilSettings,
     cilShieldAlt,
@@ -132,6 +139,7 @@ export const iconsSet = Object.assign(
     cilUser,
     cilUserFemale,
     cilUserFollow,
+    cilWarning,
     cilXCircle,
   },
   {
@@ -141,6 +149,7 @@ export const iconsSet = Object.assign(
     cifFr,
     cifEs,
     cifPl,
+    cifNg
   },
   {
     cibFacebook,

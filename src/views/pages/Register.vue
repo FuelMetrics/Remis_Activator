@@ -22,24 +22,21 @@
                   <CInputGroupText>
                     <CIcon icon="cil-lock-locked" />
                   </CInputGroupText>
-                  <CFormInput
-                    type="password"
-                    placeholder="Password"
-                    autocomplete="new-password"
-                  />
+                  <CFormInput type="password" placeholder="Password" autocomplete="new-password" />
                 </CInputGroup>
                 <CInputGroup class="mb-4">
                   <CInputGroupText>
                     <CIcon icon="cil-lock-locked" />
                   </CInputGroupText>
-                  <CFormInput
-                    type="password"
-                    placeholder="Repeat password"
-                    autocomplete="new-password"
-                  />
+                  <CFormInput type="password" placeholder="Repeat password" autocomplete="new-password" />
                 </CInputGroup>
                 <div class="d-grid">
                   <CButton color="success">Create Account</CButton>
+                </div>
+                <div class="text-center">
+                  <CButton color="link" class="px-0" @click="gotoLogin()">
+                    Back to Login
+                  </CButton>
                 </div>
               </CForm>
             </CCardBody>
@@ -47,11 +44,28 @@
         </CCol>
       </CRow>
     </CContainer>
-  </div>
+</div>
 </template>
 
 <script>
+import router from '@/router';
+
 export default {
   name: 'Register',
+  title: 'Register',
+
+  data() {
+    return {
+
+    }
+  },
+  mounted() {
+
+  },
+  methods: {
+    gotoLogin() {
+      router.push({ name: 'Login' })
+    }
+  }
 }
 </script>

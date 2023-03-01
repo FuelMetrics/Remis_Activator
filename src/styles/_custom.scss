@@ -18,3 +18,19 @@
         box-shadow: 0 0 50px 50px #57575787;
     }
 }
+
+@mixin truncate($width: '100px') {
+    width: $width;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+}
+
+.truncateWidth {
+    width: var(--wdt);
+    max-width: var(--mw);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

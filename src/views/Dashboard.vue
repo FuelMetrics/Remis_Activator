@@ -2,7 +2,7 @@
   <div>
     <div class="row">
       <div class="col-md-3 col-sm-6 col-12">
-        <div class="card bg-primary text-high-emphasis-inverse mb-4">
+        <div class="card bg-primary text-high-emphasis-inverse mb-4 card-tile">
           <div class="card-body pb-0 d-flex justify-content-between align-items-start">
             <div>
               <div class="fs-4 fw-semibold">{{ tileTotal }}</div>
@@ -12,7 +12,7 @@
         </div>
       </div>
       <div class="col-md-3 col-sm-6 col-12">
-        <div class="card bg-primary text-high-emphasis-inverse mb-4">
+        <div class="card bg-primary text-high-emphasis-inverse mb-4 card-tile">
           <div class="card-body pb-0 d-flex justify-content-between align-items-start">
             <div>
               <div class="fs-4 fw-semibold">{{ tileToday }}</div>
@@ -22,13 +22,30 @@
         </div>
       </div>
       <div class="col-md-3 col-sm-6 col-12">
-        <div class="card bg-info text-high-emphasis-inverse mb-4">
+        <div class="card bg-info text-high-emphasis-inverse mb-4 card-tile">
           <div class="card-body pb-0 d-flex justify-content-between align-items-start">
-            <div>
-              <div class="fs-5 fw-semibold ">{{ 'Agbeloba Station' }}</div>
-              <div style="font-size: small;">1/3 Vincent Street, Abeokuta</div>
+            <CTooltip v-if="currentLocation && currentLocation !== null" :content="currentLocation.stationName"
+              placement="bottom">
+              <template #toggler="{ on }">
+                <!-- <CButton color="secondary" v-on="on">Tooltip on top</CButton> -->
+                <div style="overflow: auto;" v-on="on">
+                  <div class="fs-5 fw-semibold truncateWidth" style="--wth: 100%;">{{ currentLocation.stationName }}</div>
+                  <div style="font-size: small;">{{ currentLocation.street }}</div>
+                </div>
+              </template>
+            </CTooltip>
+
+            <div v-else>
+              <div>Not mapped to any location yet</div>
             </div>
-          </div> &nbsp;
+          </div>
+          <div v-if="locationLoading" class="b-overlay position-absolute" style="inset: 0px; z-index: 10;">
+            <div class="position-absolute bg-light rounded-sm"
+              style="inset: 0px; opacity: 0.85; backdrop-filter: blur(2px);"></div>
+            <div class="position-absolute" style="top: 50%; left: 50%; transform: translateX(-50%) translateY(-50%);">
+              <span aria-hidden="true" class="spinner-border"><!----></span>
+            </div>
+          </div>
         </div>
       </div>
       <!-- <div class="col-md-3 offset-md-3 col-sm-6 col-12"> -->
@@ -330,14 +347,15 @@ export default {
         'Select a country'
       ],
       activations: [],
-      branches: [],
+      currentLocation: {},
       newPin: '',
       selectedCardNo: '',
       selectedCardOwner: '',
       tileTotal: 0,
       tileToday: 0,
       selectedActivation: {},
-      selectionTransactions: []
+      selectionTransactions: [],
+      locationLoading: true,
     }
   },
   computed: {
@@ -348,7 +366,7 @@ export default {
   mounted() {
     this.getActivations();
     this.getCountries();
-    this.getBranches();
+    this.getCurrentLocation();
   },
   watch: {
     openAddNewModal() {
@@ -512,14 +530,17 @@ export default {
           console.log('Unable to get list');
         })
     },
-    getBranches() {
-
-      this.axios.get(`${config.apiBaseUrl}/Activator/Branches`, this.authConfig)
+    getCurrentLocation() {
+      this.locationLoading = true;
+      this.axios.get(`${config.apiBaseUrl}/Activator/CurrentLocation`, this.authConfig)
         .then(res => {
-          this.branches = res.data.data;
+          this.locationLoading = false;
+          this.currentLocation = res.data;
+          console.log(this.currentLocation)
         })
         .catch(() => {
-          console.log('Unable to get branches list');
+          this.locationLoading = false;
+          console.log('Unable to get currentLocation');
         })
     },
     getCardTransaction() {
@@ -560,3 +581,9 @@ export default {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+.card-tile {
+  min-height: 101px;
+}
+</style>

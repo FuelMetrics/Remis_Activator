@@ -341,7 +341,7 @@ export default {
       lastName: '',
       email: '',
       phone: '',
-      country: '',
+      country: 'Nigeria',
       cardNumber: '',
       countries: [
         'Select a country'
